@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Approval Forecaster</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .hidden { display: none; }
+        .error { border: 2px solid #ef4444; }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .form-container {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease-in-out;
+        }
+        .form-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        body {
+            background: linear-gradient(135deg, #6b7280 0%, #3b82f6 50%, #8b5cf6 100%);
+        }
+        select, input {
+            transition: all 0.2s ease;
+        }
+        select:focus, input:focus {
+            transform: scale(1.02);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="form-container rounded-xl shadow-lg p-8 max-w-lg w-full">
+        <h1 class="text-3xl font-bold text-center text-gray-900 mb-6">Loan Approval Predictor</h1>
+        <div id="form-container" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-800">Gender</label>
+                <select id="gender" class="mt-1 block w-full rounded-md border-gray-300 bg-white/90 text-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-800">Married</label>
+                <select id="married" class="mt-1 block w-full rounded-md border-gray-300 bg-white/90 text-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-800">Education</label>
+                <select id="education" class="mt-1 block w-full rounded-md border-gray-300 bg-white/90 text-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <option value="Graduate">Graduate</option>
+                    <option value="Not Graduate">Not Graduate</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-800">Self Employed</label>
+                <select id="self_employed" class="mt-1 block w-full rounded-md border-gray-300 bg-white/90 text-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-800">Applicant Income</label>
+                <input type="number" step="any" id="applicant_income" class="mt-1 block w-full rounded-md border-gray-300 bg-white/90 text-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter income">
+                <p id="applicant_income_error" class="text-red-500 text-sm hidden">Please enter a valid income (greater than 0)</p>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-800">Coapplicant Income</label>
+                <input type="number" step="any" id="coapplicant_income" class="mt-1 block w-full rounded-md border-gray-300 bg-white/90 text-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter coapplicant income">
+                <p id="coapplicant_income_error" class="text-red-500 text-sm hidden">Please enter a valid income (0 or greater)</p>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-800">Loan Amount</label>
+                <input type="number" step="any" id="loan_amount" class="mt-1 block w-full rounded-md border-gray-300 bg-white/90 text-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter loan amount">
+                <p id="loan_amount_error" class="text-red-500 text-sm hidden">Please enter a valid loan amount (greater than 0)</p>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-800">Loan Term (in days)</label>
+                <input type="number" id="loan_term" class="mt-1 block w-full rounded-md border-gray-300 bg-white/90 text-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter loan term">
+                <p id="loan_term_error" class="text-red-500 text-sm hidden">Please enter a valid loan term (greater than 0)</p>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-800">Credit History</label>
+                <select id="credit_history" class="mt-1 block w-full rounded-md border-gray-300 bg-white/90 text-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <option value="Good">Good</option>
+                    <option value="Bad">Bad</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-800">Property Area</label>
+                <select id="property_area" class="mt-1 block w-full rounded-md border-gray-300 bg-white/90 text-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <option value="Urban">Urban</option>
+                    <option value="Semiurban">Semiurban</option>
+                    <option value="Rural">Rural</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-800">Choose Model</label>
+                <select id="model" class="mt-1 block w-full rounded-md border-gray-300 bg-white/90 text-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <option value="model1">Model 1</option>
+                    <option value="model2">Model 2</option>
+                </select>
+            </div>
+
+            <button id="predict-btn" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 px-4 rounded-md hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center transition-all duration-300">
+                <span id="predict-text">Predict</span>
+                <span id="loading-spinner" class="loading-spinner hidden ml-2"></span>
+            </button>
+        </div>
+
+        <div id="prediction-result" class="mt-6 hidden">
+            <h2 class="text-2xl font-semibold text-gray-900">Prediction: <span id="prediction-text" class="text-blue-600"></span></h2>
+        </div>
+    </div>
+
+    <script>
+        const formInputs = {
+            applicant_income: document.getElementById('applicant_income'),
+            coapplicant_income: document.getElementById('coapplicant_income'),
+            loan_amount: document.getElementById('loan_amount'),
+            loan_term: document.getElementById('loan_term'),
+            gender: document.getElementById('gender'),
+            married: document.getElementById('married'),
+            education: document.getElementById('education'),
+            self_employed: document.getElementById('self_employed'),
+            credit_history: document.getElementById('credit_history'),
+            property_area: document.getElementById('property_area'),
+            model: document.getElementById('model')
+        };
+
+        const predictBtn = document.getElementById('predict-btn');
+        const predictText = document.getElementById('predict-text');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const predictionResult = document.getElementById('prediction-result');
+        const predictionTextElement = document.getElementById('prediction-text');
+
+        function validateInputs() {
+            let isValid = true;
+            const fields = [
+                { id: 'applicant_income', errorId: 'applicant_income_error', condition: val => val > 0 },
+                { id: 'coapplicant_income', errorId: 'coapplicant_income_error', condition: val => val >= 0 },
+                { id: 'loan_amount', errorId: 'loan_amount_error', condition: val => val > 0 },
+                { id: 'loan_term', errorId: 'loan_term_error', condition: val => val > 0 }
+            ];
+
+            fields.forEach(field => {
+                const input = formInputs[field.id];
+                const error = document.getElementById(field.errorId);
+                const value = parseFloat(input.value);
+                if (!field.condition(value)) {
+                    input.classList.add('error');
+                    error.classList.remove('hidden');
+                    isValid = false;
+                } else {
+                    input.classList.remove('error');
+                    error.classList.add('hidden');
+                }
+            });
+
+            return isValid;
+        }
+
+        predictBtn.addEventListener('click', async () => {
+            if (!validateInputs()) return;
+
+            predictBtn.disabled = true;
+            predictText.textContent = 'Predicting...';
+            loadingSpinner.classList.remove('hidden');
+
+            const formData = {
+                gender: formInputs.gender.value,
+                married: formInputs.married.value,
+                education: formInputs.education.value,
+                self_employed: formInputs.self_employed.value,
+                applicant_income: parseFloat(formInputs.applicant_income.value),
+                coapplicant_income: parseFloat(formInputs.coapplicant_income.value),
+                loan_amount: parseFloat(formInputs.loan_amount.value),
+                loan_term: parseInt(formInputs.loan_term.value),
+                credit_history: formInputs.credit_history.value,
+                property_area: formInputs.property_area.value,
+                model: formInputs.model.value
+            };
+
+            try {
+                // Placeholder for actual API call
+                // const response = await fetch('/predict', { method: 'POST', body: JSON.stringify(formData), headers: { 'Content-Type': 'application/json' } });
+                // const result = await response.json();
+
+                // Simulated prediction response
+                const result = { prediction: 'Approved' }; // Replace with actual API response
+
+                predictionTextElement.textContent = result.prediction;
+                predictionResult.classList.remove('hidden');
+            } catch (error) {
+                predictionTextElement.textContent = 'Error occurred during prediction';
+                predictionResult.classList.remove('hidden');
+            } finally {
+                predictBtn.disabled = false;
+                predictText.textContent = 'Predict';
+                loadingSpinner.classList.add('hidden');
+            }
+        });
+
+        // Real-time validation
+        Object.keys(formInputs).forEach(key => {
+            if (['applicant_income', 'coapplicant_income', 'loan_amount', 'loan_term'].includes(key)) {
+                formInputs[key].addEventListener('input', validateInputs);
+            }
+        });
+    </script>
+</body>
+</html>
